@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -114,4 +114,3 @@ products.forEach(product => {
   `;
   productList.appendChild(div);
 });
->>>>>>> 01a21417c6f3e8195588dc1a1edd6327588c3d8e

@@ -2,7 +2,7 @@
   "name": "SimpleShop E-commerce",
   "short_name": "SimpleShop",
   "description": "A sample e-commerce Progressive Web Application",
-  "start_url": "/index.html",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0d6efd",

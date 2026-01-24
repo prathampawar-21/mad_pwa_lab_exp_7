@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 const products = [
   { name: "Wireless Headphones", price: 2999 },
   { name: "Smart Watch", price: 4499 },
@@ -47,5 +46,4 @@ button {
   padding: 8px 12px;
   cursor: pointer;
   border-radius: 4px;
->>>>>>> 01a21417c6f3e8195588dc1a1edd6327588c3d8e
 }
