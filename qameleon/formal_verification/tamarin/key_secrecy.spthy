@@ -1,0 +1,10 @@
+theory KeySecrecy
+begin
+builtins: hashing
+
+rule KeyGen:
+  [ Fr(~k) ] --> [ !Key($A, ~k) ]
+
+lemma key_secrecy:
+  "All A k #i. !Key(A, k) @i ==> not (Ex #j. K(k) @j)"
+end

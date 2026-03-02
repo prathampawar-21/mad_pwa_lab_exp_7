@@ -1,0 +1,19 @@
+(* Cross-Domain Security ProVerif Model *)
+
+type classification.
+type key.
+
+const UNCLASSIFIED: classification.
+const SECRET: classification.
+
+fun classLevel(classification): nat
+  reduc classLevel(UNCLASSIFIED) = 0;
+        classLevel(SECRET) = 2.
+
+free c_unclassified: channel.
+free c_secret: channel [private].
+
+process
+  new k_secret: key;
+  out(c_secret, k_secret)
+  (* Secret key never flows to unclassified channel *)

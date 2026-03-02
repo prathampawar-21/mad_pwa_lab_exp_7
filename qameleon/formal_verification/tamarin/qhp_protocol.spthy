@@ -1,0 +1,38 @@
+/* QHP Protocol formal model for Tamarin */
+theory QHPProtocol
+begin
+
+builtins: hashing, asymmetric-encryption, signing
+
+/* Key generation */
+rule GenKEMKey:
+  [ Fr(~sk) ]
+  -->
+  [ !KEMKey($A, ~sk), Out(pk(~sk)) ]
+
+rule GenSigKey:
+  [ Fr(~sk) ]
+  -->
+  [ !SigKey($A, ~sk), Out(pk(~sk)) ]
+
+/* HELLO message */
+rule SendHello:
+  [ !KEMKey($A, ~kem_sk), !SigKey($A, ~sig_sk), Fr(~nonce) ]
+  -->
+  [ Out(sign(<'HELLO', pk(~kem_sk), $A, ~nonce>, ~sig_sk)),
+    HelloSent($A, ~nonce) ]
+
+/* Key agreement */
+rule KeyAgreement:
+  [ HelloSent($A, ~nonce_A), In(sign(<'HELLO', pk(~kem_sk_B), $B, ~nonce_B>, ~sig_sk_B)) ]
+  -->
+  [ SessionEstablished($A, $B, h(<~nonce_A, ~nonce_B>)) ]
+
+/* Secrecy lemma */
+lemma session_key_secrecy:
+  "All A B k #i.
+    SessionEstablished(A, B, k) @i
+    ==>
+    not (Ex #j. K(k) @j)"
+
+end
