@@ -1,0 +1,16 @@
+theory MutualAuthentication
+begin
+builtins: signing
+
+rule GenKey:
+  [ Fr(~sk) ] --> [ !Key($A, ~sk), Out(pk(~sk)) ]
+
+rule Auth:
+  [ !Key($A, ~sk), Fr(~n) ]
+  -->
+  [ Out(sign(~n, ~sk)), Authenticated($A, ~n) ]
+
+lemma mutual_authentication:
+  "All A n #i. Authenticated(A, n) @i ==>
+    (Ex #j. j < i & K(n) @j)"
+end

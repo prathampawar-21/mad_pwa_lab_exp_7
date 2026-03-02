@@ -1,0 +1,32 @@
+(* QHP Protocol ProVerif Model *)
+
+type key.
+type nonce.
+
+fun pk(key): key.
+fun sign(bitstring, key): bitstring.
+fun verify(bitstring, bitstring, key): bool
+  reduc forall m: bitstring, sk: key;
+    verify(sign(m, sk), m, pk(sk)) = true.
+
+free c: channel.
+
+let Alice(ska: key, pkb: key) =
+  new na: nonce;
+  out(c, (pk(ska), na));
+  in(c, (pkB: key, nb: nonce));
+  new ss: key;
+  out(c, sign((ss, na, nb), ska)).
+
+let Bob(skb: key) =
+  in(c, (pkA: key, na: nonce));
+  new nb: nonce;
+  out(c, (pk(skb), nb));
+  in(c, sig: bitstring).
+
+process
+  new ska: key;
+  new skb: key;
+  out(c, pk(ska));
+  out(c, pk(skb));
+  (Alice(ska, pk(skb)) | Bob(skb))

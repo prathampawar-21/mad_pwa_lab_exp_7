@@ -1,0 +1,11 @@
+theory ForwardSecrecy
+begin
+builtins: hashing, diffie-hellman
+
+rule EphemeralKey:
+  [ Fr(~x) ] --> [ !Ephemeral($A, ~x), Out('g'^~x) ]
+
+lemma forward_secrecy:
+  "All A x #i. !Ephemeral(A, x) @i ==>
+    not (Ex #j. K(x) @j & j > i)"
+end

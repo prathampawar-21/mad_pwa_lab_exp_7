@@ -1,0 +1,15 @@
+theory MonotonicUpgrade
+begin
+
+rule SetLevel:
+  [ Fr(~level) ] --> [ !Level($A, ~level) ]
+
+rule Upgrade:
+  [ !Level($A, ~old), Fr(~new) ]
+  --[ Upgraded($A, ~old, ~new) ]-->
+  [ !Level($A, ~new) ]
+
+lemma no_downgrade:
+  "All A old new #i. Upgraded(A, old, new) @i ==>
+    not (new < old)"
+end
