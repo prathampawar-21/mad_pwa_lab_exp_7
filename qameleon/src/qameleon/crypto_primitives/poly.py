@@ -75,7 +75,15 @@ class KyberPoly:
 
     @classmethod
     def cbd(cls, eta: int, seed: bytes) -> "KyberPoly":
-        """Sample from centered binomial distribution."""
+        """Sample from centered binomial distribution CBD_eta.
+
+        Each coefficient is sampled as (sum of eta bits) - (sum of eta bits),
+        giving values in [-eta, eta]. Used for secret and error polynomials.
+
+        Args:
+            eta: Noise parameter (2 or 3 for ML-KEM).
+            seed: 32-byte PRF seed used to expand pseudorandom bits.
+        """
         # Use SHAKE-256 to expand seed
         shake = hashlib.shake_256()
         shake.update(seed)
@@ -100,7 +108,17 @@ class KyberPoly:
 
     @classmethod
     def sample_uniform(cls, seed: bytes, i: int, j: int) -> "KyberPoly":
-        """Sample uniform polynomial from XOF (SHAKE-128)."""
+        """Sample uniform polynomial from XOF (SHAKE-128).
+
+        Used to generate the public matrix A. The indices i, j are the row
+        and column position in the module matrix and are appended to the seed
+        so that each entry is independently and uniformly distributed.
+
+        Args:
+            seed: 32-byte public seed rho.
+            i: Row index of the matrix entry.
+            j: Column index of the matrix entry.
+        """
         xof_input = seed + bytes([i, j])
         shake = hashlib.shake_128()
         shake.update(xof_input)

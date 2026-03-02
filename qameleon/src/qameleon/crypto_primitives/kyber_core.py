@@ -125,9 +125,6 @@ def kyber_encaps(params: KyberParams, public_key: bytes) -> tuple[bytes, bytes]:
     # u = A^T * r + e1
     u = KyberPolyVec(params.k)
     for i in range(params.k):
-        col = KyberPolyVec(params.k)
-        col.polys = [A[j].polys[i] if hasattr(A[j], 'polys') else A[j][i] for j in range(params.k)]
-        # Fix: A[j] is a list of KyberPoly, not KyberPolyVec
         col_vec = KyberPolyVec(params.k)
         col_vec.polys = [A[j][i] for j in range(params.k)]
         u.polys[i] = col_vec.dot(r_hat).ntt_inv().add(e1.polys[i])
