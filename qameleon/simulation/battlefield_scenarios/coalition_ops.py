@@ -1,6 +1,6 @@
 """Coalition operations cross-domain secure communication."""
 
-from simulation.mesh_simulator import MeshSimulator
+from qameleon.simulation.mesh_simulator import MeshSimulator
 
 
 def simulate_coalition_ops(num_partners: int = 3, duration: float = 200.0) -> dict:

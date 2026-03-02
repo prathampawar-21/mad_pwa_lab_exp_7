@@ -1,6 +1,6 @@
 """Quantum harvest-now-decrypt-later attack simulation."""
 
-from simulation.mesh_simulator import MeshSimulator
+from qameleon.simulation.mesh_simulator import MeshSimulator
 
 
 def simulate_quantum_harvest(num_nodes: int = 10, duration: float = 100.0) -> dict:

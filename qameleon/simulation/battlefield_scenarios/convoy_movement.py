@@ -1,6 +1,6 @@
 """Convoy movement secure communication simulation."""
 
-from simulation.mesh_simulator import MeshSimulator
+from qameleon.simulation.mesh_simulator import MeshSimulator
 
 
 def simulate_convoy(num_vehicles: int = 10, duration: float = 300.0) -> dict:

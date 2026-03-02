@@ -1,6 +1,6 @@
 """Downgrade attack simulation."""
 
-from simulation.mesh_simulator import MeshSimulator
+from qameleon.simulation.mesh_simulator import MeshSimulator
 
 
 def simulate_downgrade_attack(num_nodes: int = 5) -> dict:

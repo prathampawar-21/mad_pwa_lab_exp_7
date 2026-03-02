@@ -1,6 +1,6 @@
 """Cross-domain information leak simulation."""
 
-from simulation.mesh_simulator import MeshSimulator
+from qameleon.simulation.mesh_simulator import MeshSimulator
 
 
 def simulate_cross_domain_leak(num_domains: int = 3) -> dict:

@@ -1,6 +1,6 @@
 """Node compromise attack simulation."""
 
-from simulation.mesh_simulator import MeshSimulator
+from qameleon.simulation.mesh_simulator import MeshSimulator
 
 
 def simulate_node_compromise(num_nodes: int = 10, compromised_fraction: float = 0.2) -> dict:
