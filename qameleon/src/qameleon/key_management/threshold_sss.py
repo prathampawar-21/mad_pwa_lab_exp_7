@@ -39,6 +39,8 @@ def _gf_div(a: int, b: int) -> int:
 
 
 def _gf_pow(x: int, power: int) -> int:
+    if x == 0:
+        return 0
     return _GF_EXP[(_GF_LOG[x] * power) % 255]
 
 

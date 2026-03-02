@@ -1,6 +1,5 @@
 """Build script for C acceleration libraries."""
 
-import os
 import platform
 import subprocess
 import sys

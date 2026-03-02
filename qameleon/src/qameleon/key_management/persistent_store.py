@@ -9,6 +9,9 @@ from typing import Optional
 from qameleon.crypto_primitives.symmetric import SymmetricCipher, EncryptedPayload
 from qameleon.key_management.key_store import KeyStore, KeyEntry, KeyState
 
+# File format: [16-byte random salt][12-byte nonce][ciphertext]
+_SALT_LEN = 16
+
 
 class PersistentKeyStore(KeyStore):
     """Key store that persists encrypted keys to disk."""
@@ -18,13 +21,12 @@ class PersistentKeyStore(KeyStore):
     def __init__(self, path: str, password: str) -> None:
         super().__init__()
         self._path = Path(path)
-        self._master_key = self._derive_master_key(password)
+        self._password = password
         if self._path.exists():
             self.load()
 
-    def _derive_master_key(self, password: str) -> bytes:
-        """Derive master key using PBKDF2-SHA256."""
-        salt = hashlib.sha256(b"QAMELEON-PERSISTENT-STORE" + password.encode()).digest()
+    def _derive_master_key(self, password: str, salt: bytes) -> bytes:
+        """Derive master key using PBKDF2-SHA256 with a provided salt."""
         return hashlib.pbkdf2_hmac(
             "sha256",
             password.encode(),
@@ -48,20 +50,24 @@ class PersistentKeyStore(KeyStore):
                     "rotated_from": entry.rotated_from,
                 }
             plaintext = json.dumps(data).encode()
-            payload = SymmetricCipher.encrypt(self._master_key, plaintext)
+            salt = os.urandom(_SALT_LEN)
+            master_key = self._derive_master_key(self._password, salt)
+            payload = SymmetricCipher.encrypt(master_key, plaintext)
             self._path.parent.mkdir(parents=True, exist_ok=True)
             with open(self._path, "wb") as f:
-                f.write(payload.nonce + payload.ciphertext)
+                f.write(salt + payload.nonce + payload.ciphertext)
 
     def load(self) -> None:
         """Load and decrypt keys from disk."""
         try:
             with open(self._path, "rb") as f:
                 raw = f.read()
-            nonce = raw[:12]
-            ciphertext = raw[12:]
+            salt = raw[:_SALT_LEN]
+            nonce = raw[_SALT_LEN:_SALT_LEN + 12]
+            ciphertext = raw[_SALT_LEN + 12:]
+            master_key = self._derive_master_key(self._password, salt)
             payload = EncryptedPayload(nonce=nonce, ciphertext=ciphertext, aad=b"")
-            plaintext = SymmetricCipher.decrypt(self._master_key, payload)
+            plaintext = SymmetricCipher.decrypt(master_key, payload)
             data = json.loads(plaintext.decode())
 
             with self._lock:
@@ -86,10 +92,22 @@ class PersistentKeyStore(KeyStore):
             self._keys.pop(key_id, None)
 
     def change_password(self, old_password: str, new_password: str) -> bool:
-        """Change the master password."""
-        old_key = self._derive_master_key(old_password)
-        if old_key != self._master_key:
-            return False
-        self._master_key = self._derive_master_key(new_password)
+        """Change the master password. Re-saves with a new random salt."""
+        old_key_candidate = self._derive_master_key(old_password, b"verify")
+        # Re-derive from stored file to verify old password
+        if self._path.exists():
+            try:
+                with open(self._path, "rb") as f:
+                    raw = f.read()
+                salt = raw[:_SALT_LEN]
+                nonce = raw[_SALT_LEN:_SALT_LEN + 12]
+                ciphertext = raw[_SALT_LEN + 12:]
+                old_master_key = self._derive_master_key(old_password, salt)
+                payload = EncryptedPayload(nonce=nonce, ciphertext=ciphertext, aad=b"")
+                SymmetricCipher.decrypt(old_master_key, payload)  # raises on wrong password
+            except Exception:
+                return False
+        self._password = new_password
         self.save()
         return True
+
