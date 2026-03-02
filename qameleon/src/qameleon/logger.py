@@ -19,8 +19,13 @@ class JSONFormatter(logging.Formatter):
         }
         if record.exc_info:
             log_data["exception"] = self.formatException(record.exc_info)
-        if hasattr(record, "extra"):
-            log_data.update(record.extra)
+        # Merge any custom fields added via the `extra` kwarg in logging calls.
+        _standard_attrs = logging.LogRecord(
+            "", 0, "", 0, "", (), None
+        ).__dict__.keys() | {"message", "asctime"}
+        for key, val in record.__dict__.items():
+            if key not in _standard_attrs:
+                log_data[key] = val
         return json.dumps(log_data)
 
 
