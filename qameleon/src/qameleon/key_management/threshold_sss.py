@@ -14,9 +14,9 @@ def _init_gf() -> None:
     for i in range(255):
         _GF_EXP[i] = x
         _GF_LOG[x] = i
-        x <<= 1
-        if x & 0x100:
-            x ^= 0x11B  # AES primitive polynomial
+        # Use generator 3 (0x03) with AES polynomial x^8+x^4+x^3+x+1
+        x ^= (x << 1) ^ (0x1B if x & 0x80 else 0)
+        x &= 0xFF
     for i in range(255, 512):
         _GF_EXP[i] = _GF_EXP[i - 255]
 

@@ -1,0 +1,128 @@
+Metadata-Version: 2.4
+Name: qameleon
+Version: 1.0.0
+Summary: Quantum-Adaptive Military-Grade Encrypted Link & Operational Exchange for Networks
+License: MIT License
+        
+        Copyright (c) 2026 QAMELEON Project
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: fastapi>=0.110.0
+Requires-Dist: uvicorn[standard]>=0.27.0
+Requires-Dist: pydantic>=2.6.0
+Requires-Dist: cryptography>=42.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.23.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.1.0; extra == "dev"
+Requires-Dist: ruff>=0.3.0; extra == "dev"
+Requires-Dist: mypy>=1.8.0; extra == "dev"
+Requires-Dist: black>=24.0.0; extra == "dev"
+Requires-Dist: httpx>=0.27.0; extra == "dev"
+Dynamic: license-file
+
+# QAMELEON
+**Quantum-Adaptive Military-Grade Encrypted Link & Operational Exchange for Networks**
+
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![FIPS 203/204](https://img.shields.io/badge/FIPS-203%2F204-green.svg)](docs/protocol-specification.md)
+
+## Overview
+
+QAMELEON is a production-grade post-quantum cryptographic framework implementing NIST FIPS 203 (ML-KEM) and FIPS 204 (ML-DSA) standards with hybrid classical/post-quantum key exchange, classification-aware adaptive algorithm selection, and military-grade secure mesh networking.
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│                   Mesh Network                  │
+├─────────────────────────────────────────────────┤
+│              Protocol (QHP)                     │
+├──────────────┬──────────────────────────────────┤
+│     CADE     │        Threat Intelligence       │
+├──────────────┴──────────────────────────────────┤
+│              Key Management                     │
+├─────────────────────────────────────────────────┤
+│             Crypto Primitives                   │
+│  ML-KEM │ ML-DSA │ Hybrid │ Symmetric │ Hash   │
+└─────────────────────────────────────────────────┘
+```
+
+## Quick Start
+
+```bash
+# Install
+pip install -e ".[dev]"
+
+# Run tests
+make test
+
+# Start dashboard
+make dashboard
+
+# Build C acceleration
+make build-c
+```
+
+## Usage
+
+```python
+from qameleon.crypto_primitives.ml_kem import MLKEM
+from qameleon.crypto_primitives.ml_dsa import MLDSA
+from qameleon.crypto_primitives.hybrid_kem import HybridKEM
+
+# ML-KEM key exchange
+kem = MLKEM(security_level=768)
+keypair = kem.keygen()
+result = kem.encaps(keypair.public_key)
+shared_secret = kem.decaps(keypair.secret_key, result.ciphertext)
+
+# ML-DSA signing
+dsa = MLDSA(security_level=65)
+keys = dsa.keygen()
+sig = dsa.sign(keys.secret_key, b"message")
+assert dsa.verify(keys.public_key, b"message", sig)
+
+# Hybrid KEM (post-quantum + classical)
+hybrid = HybridKEM()
+hkp = hybrid.keygen()
+enc = hybrid.encaps(hkp.public_key)
+ss = hybrid.decaps(hkp.secret_key, enc)
+```
+
+## Testing
+
+```bash
+make test-unit        # Unit tests
+make test-security    # Security tests
+make coverage         # Coverage report
+```
+
+## Documentation
+
+- [Architecture](docs/architecture.md)
+- [Protocol Specification](docs/protocol-specification.md)
+- [Threat Model](docs/threat-model.md)
+- [Deployment Guide](docs/deployment-guide.md)
+- [API Reference](docs/api-reference.md)

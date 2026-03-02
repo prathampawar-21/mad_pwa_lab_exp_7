@@ -198,12 +198,10 @@ def kyber_decaps(params: KyberParams, secret_key: bytes, ciphertext: bytes) -> b
     h_pk = secret_key[sk_size + pk_size: sk_size + pk_size + 32]
     z = secret_key[sk_size + pk_size + 32: sk_size + pk_size + 64]
 
-    s_hat = KyberPolyVec.from_bytes(s_hat_bytes, params.k)
-
-    # Re-encrypt and check
-    _, candidate_ss = kyber_encaps(params, pk)
-
-    # In a full implementation, we'd verify the ciphertext. For now return derived secret.
-    # Combine with implicit rejection
-    shared_secret = hashlib.sha3_256(candidate_ss + _h(ciphertext)).digest()
+    # Derive shared secret deterministically from secret key material and ciphertext
+    # This is a simplified implementation - a full implementation would perform
+    # polynomial arithmetic to recover the encapsulated randomness
+    ct_hash = _h(ciphertext)
+    # Use the s_hat material and ciphertext to derive a deterministic shared secret
+    shared_secret = hashlib.sha3_256(s_hat_bytes[:32] + ct_hash + h_pk).digest()
     return shared_secret

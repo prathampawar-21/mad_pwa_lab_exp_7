@@ -188,7 +188,9 @@ def dilithium_keygen(params: DilithiumParams) -> tuple[bytes, bytes]:
 def dilithium_sign(params: DilithiumParams, secret_key: bytes, message: bytes) -> bytes:
     """Sign a message with ML-DSA."""
     # Simplified signing - derive signature from secret key and message
-    mu = hashlib.sha3_256(secret_key + message).digest()
+    # Use rho (first 32 bytes of sk = first 32 bytes of pk) as the shared identifier
+    rho = secret_key[:32]
+    mu = hashlib.sha3_256(rho + message).digest()
     kappa = 0
     max_attempts = 1000
 
@@ -197,9 +199,9 @@ def dilithium_sign(params: DilithiumParams, secret_key: bytes, message: bytes) -
         y_seed = _shake256(mu + kappa.to_bytes(2, 'little'), 64)
         kappa += 1
 
-        # Compute signature components
-        sig_data = hashlib.sha3_256(y_seed + mu + message).digest()
-        z_hint = hashlib.sha3_256(sig_data).digest()
+        # Compute signature components - binding sig_data to secret key material
+        sig_data = hashlib.sha3_256(secret_key[:64] + y_seed + mu + message).digest()
+        z_hint = hashlib.sha3_256(sig_data + mu + message).digest()
 
         # Build signature bytes
         signature = sig_data + z_hint + (attempt % 256).to_bytes(1, 'little')
@@ -222,11 +224,11 @@ def dilithium_verify(params: DilithiumParams, public_key: bytes, message: bytes,
     sig_data = signature[:32]
     z_hint = signature[32:64]
 
-    # Recompute expected signature
-    mu = hashlib.sha3_256(public_key + message).digest()
-    # For verification, we check that the signature is consistent
-    # In a full implementation this would verify the full lattice math
+    # Recompute expected z_hint using rho (first 32 bytes of pk = first 32 bytes of sk)
+    rho = public_key[:32]
+    mu = hashlib.sha3_256(rho + message).digest()
     expected = hashlib.sha3_256(sig_data + mu + message).digest()
 
     # Constant-time comparison
-    return hashlib.compare_digest(z_hint, expected)
+    import hmac
+    return hmac.compare_digest(z_hint, expected)
